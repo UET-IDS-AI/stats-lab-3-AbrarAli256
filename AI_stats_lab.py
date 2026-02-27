@@ -49,8 +49,37 @@ def card_experiment():
         empirical_P_B_given_A,
         absolute_error
     """
+    P_A         = 4 / 52       
+    P_B         = 4 / 52       
+    P_B_given_A = 3 / 51       
+    P_AB        = P_A * P_B_given_A   
+    rng = np.random.default_rng(42)
 
-    raise NotImplementedError
+
+    n_simulations = 200_000
+    deck = np.arange(52)
+    draws = np.array([rng.choice(deck, size=2, replace=False) for _ in range(n_simulations)])
+
+    first_card  = draws[:, 0] 
+    second_card = draws[:, 1]  
+
+    event_A = first_card < 4
+    event_B = second_card < 4
+    empirical_P_A = np.mean(event_A)
+    A_occurred = event_A
+    empirical_P_B_given_A = np.sum(event_A & event_B) / np.sum(A_occurred)
+    absolute_error = abs(P_B_given_A - empirical_P_B_given_A)
+
+    return (
+        P_A,
+        P_B,
+        P_B_given_A,
+        P_AB,
+        empirical_P_A,
+        empirical_P_B_given_A,
+        absolute_error
+    )
+
 
 
 # =========================================================
@@ -82,9 +111,20 @@ def bernoulli_lightbulb(p=0.05):
         empirical_P_X_1,
         absolute_error
     """
+    theoretical_P_X_1 = p          
+    theoretical_P_X_0 = 1 - p      
+    rng = np.random.default_rng(42)
+    bulbs = rng.binomial(n=1, p=p, size=100_000)
+    empirical_P_X_1 = np.mean(bulbs)
 
-    raise NotImplementedError
+    absolute_error = abs(theoretical_P_X_1 - empirical_P_X_1)
 
+    return (
+        theoretical_P_X_1,
+        theoretical_P_X_0,
+        empirical_P_X_1,
+        absolute_error
+    )
 
 # =========================================================
 # QUESTION 3 – Binomial
@@ -117,9 +157,22 @@ def binomial_bulbs(n=10, p=0.05):
         empirical_P_ge_1,
         absolute_error
     """
+    theoretical_P_0 = math.comb(n, 0) * (p**0) * ((1-p)**n)
+    theoretical_P_2 = math.comb(n, 2) * (p**2) * ((1-p)**(n-2))
+    theoretical_P_ge_1 = 1 - theoretical_P_0
+    rng = np.random.default_rng(42)
+    inspections = rng.binomial(n=n, p=p, size=100_000)
+    empirical_P_ge_1 = np.mean(inspections >= 1)
+    absolute_error = abs(theoretical_P_ge_1 - empirical_P_ge_1)
 
-    raise NotImplementedError
-
+    return (
+        theoretical_P_0,
+        theoretical_P_2,
+        theoretical_P_ge_1,
+        empirical_P_ge_1,
+        absolute_error
+    )
+   
 
 # =========================================================
 # QUESTION 4 – Geometric
@@ -154,8 +207,30 @@ def geometric_die():
         empirical_P_gt_4,
         absolute_error
     """
+    p = 1/6
+    q = 5/6  
 
-    raise NotImplementedError
+
+    theoretical_P_1 = (q**0) * p        
+
+    theoretical_P_3 = (q**2) * p          
+    theoretical_P_gt_4 = q**4             
+    rng = np.random.default_rng(42)
+
+    rolls = rng.geometric(p=p, size=200_000)
+
+    empirical_P_gt_4 = np.mean(rolls > 4)
+
+    absolute_error = abs(theoretical_P_gt_4 - empirical_P_gt_4)
+
+    return (
+        theoretical_P_1,
+        theoretical_P_3,
+        theoretical_P_gt_4,
+        empirical_P_gt_4,
+        absolute_error
+    )
+
 
 
 # =========================================================
@@ -189,5 +264,29 @@ def poisson_customers(lam=12):
         empirical_P_ge_18,
         absolute_error
     """
+    theoretical_P_0 = (math.e**(-lam) * lam**0) / math.factorial(0)
+    theoretical_P_15 = (math.e**(-lam) * lam**15) / math.factorial(15)
 
-    raise NotImplementedError
+    theoretical_P_ge_18 = 1 - sum(
+        (math.e**(-lam) * lam**k) / math.factorial(k)
+        for k in range(18)       
+    )
+
+
+    rng = np.random.default_rng(42)
+
+    hours = rng.poisson(lam=lam, size=100_000)
+
+    empirical_P_ge_18 = np.mean(hours >= 18)
+
+    absolute_error = abs(theoretical_P_ge_18 - empirical_P_ge_18)
+
+    return (
+        theoretical_P_0,
+        theoretical_P_15,
+        theoretical_P_ge_18,
+        empirical_P_ge_18,
+        absolute_error
+    )
+
+  
